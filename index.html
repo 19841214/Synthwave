@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>NEON SHORTCUT RUNNER: ULTIMATE EDITION</title>
+<title>NEON SHORTCUT RUNNER: HP UPDATE</title>
 <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Audiowide&display=swap" rel="stylesheet">
 <style>
   body {
@@ -56,8 +56,16 @@
   .hud-top {
     display: flex;
     justify-content: space-between;
+    align-items: flex-start;
     font-size: 1.2rem;
     color: #0ff;
+  }
+  
+  .hud-left-group {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    text-align: left;
   }
 
   .hud-bottom {
@@ -66,6 +74,13 @@
     color: #888;
     font-size: 0.8rem;
     letter-spacing: 2px;
+  }
+  
+  /* 愛心樣式 */
+  #lives-display {
+    color: #ff3333;
+    text-shadow: 0 0 10px #ff0000;
+    font-size: 1.5rem;
   }
 
   /* 通用全螢幕覆蓋層 */
@@ -78,7 +93,7 @@
     width: 100%;
     height: 100%;
     display: none;
-    background: rgba(5, 0, 16, 0.9); /* 半透明黑底，讓文字更清楚 */
+    background: rgba(5, 0, 16, 0.9);
     flex-direction: column;
     justify-content: center;
     align-items: center;
@@ -120,18 +135,17 @@
   /* 快捷鍵列表樣式 */
   .shortcut-list-container {
     margin-top: 20px;
-    max-height: 40vh; /* 限制高度 */
-    overflow-y: auto; /* 允許滾動 */
+    max-height: 40vh;
+    overflow-y: auto;
     width: 80%;
     max-width: 600px;
     border: 1px solid #555;
     background: rgba(0,0,0,0.8);
     padding: 15px;
     border-radius: 10px;
-    pointer-events: auto; /* 允許滾動 */
+    pointer-events: auto;
   }
   
-  /* 隱藏滾動條但保留功能 */
   .shortcut-list-container::-webkit-scrollbar { width: 5px; }
   .shortcut-list-container::-webkit-scrollbar-thumb { background: #555; border-radius: 5px; }
 
@@ -278,16 +292,20 @@
 
 <div id="ui-layer">
   <div class="hud-top">
-    <div id="score-display">SCORE: 000000</div>
-    <div id="combo-display">COMBO: 0</div>
+    <div class="hud-left-group">
+      <div id="lives-display">❤❤❤❤❤</div>
+      <div id="score-display">SCORE: 000000</div>
+    </div>
+    
     <div id="level-display">SYSTEM IDLE</div>
+    <div id="combo-display">COMBO: 0</div>
   </div>
   <div class="hud-bottom" id="system-status">
     WAITING FOR USER INPUT...
   </div>
 </div>
 
-<!-- 1. 歡迎畫面 (觸發音效用) -->
+<!-- 1. 歡迎畫面 -->
 <div id="welcome-screen" class="fullscreen-overlay" style="display:flex;">
   <h1>NEON<br>RUNNER</h1>
   <div style="margin-top:20px; font-size: 0.8rem; color: #888;">KEYBOARD SHORTCUT TRAINING PROGRAM</div>
@@ -316,12 +334,9 @@
   <div class="rank-badge">RANK: S (CYBER GOD)</div>
   <div class="blink-text" id="victory-score" style="margin-top:0;">FINAL SCORE: 000000</div>
   
-  <!-- 隱藏秘籍列表 -->
   <div class="shortcut-list-container bonus-section">
     <div class="list-title bonus-title">SECRET DATA UNLOCKED (BONUS HACKS)</div>
-    <div id="victory-list-content">
-      <!-- JS 動態生成 -->
-    </div>
+    <div id="victory-list-content"></div>
   </div>
 
   <div class="blink-text" style="margin-top:20px; color:#fff; font-size:0.8rem;">PRESS [ENTER] TO REBOOT</div>
@@ -332,12 +347,9 @@
   <h1>GAME<br>OVER</h1>
   <div class="blink-text" id="gameover-score" style="margin-top:0;">FINAL SCORE: 0</div>
   
-  <!-- 失敗複習列表 -->
   <div class="shortcut-list-container">
     <div class="list-title">REVIEW FAILED PROTOCOLS (LEVEL DATA)</div>
-    <div id="gameover-list-content">
-      <!-- JS 動態生成 -->
-    </div>
+    <div id="gameover-list-content"></div>
   </div>
 
   <div class="blink-text" style="margin-top:20px; font-size:0.8rem;">PRESS [ENTER] TO RESTART</div>
@@ -362,7 +374,7 @@
     sounds: {},
     currentBGM: null,
     isMuted: false,
-    initialized: false, // 追蹤是否已初始化
+    initialized: false,
     
     urls: {
       hit: 'https://cdn.pixabay.com/download/audio/2022/03/15/audio_297f73b4ca.mp3?filename=freesound_community-zap_c_07-82067.mp3',
@@ -377,8 +389,6 @@
 
     init: function() {
       if (this.initialized) return;
-      
-      // 建立 AudioContext (如果需要)
       const AudioContext = window.AudioContext || window.webkitAudioContext;
       this.ctx = new AudioContext();
 
@@ -502,7 +512,6 @@
     ]
   };
 
-  // 隱藏秘籍資料 (Victory Screen)
   const BONUS_SHORTCUTS = {
     CHROMEBOOK: [
       { label: "救回分頁", hint: "Ctrl + Shift + T" },
@@ -524,14 +533,16 @@
   const ctx = canvas.getContext('2d');
 
   let state = {
-    screen: 'WELCOME', // WELCOME -> START -> PLAY -> GAMEOVER/VICTORY
+    screen: 'WELCOME', 
     system: 'CHROMEBOOK',
     score: 0,
     combo: 0,
+    lives: 5,
     levelIdx: 0,
     shake: 0, 
     lastTime: 0,
-    transitionTimer: 0
+    transitionTimer: 0,
+    damageFlash: 0
   };
 
   let entities = {
@@ -652,6 +663,10 @@
     document.getElementById('score-display').innerText = `SCORE: ${state.score.toString().padStart(6, '0')}`;
     document.getElementById('combo-display').innerText = `COMBO: ${state.combo}`;
     
+    // 生命值顯示
+    const hearts = "❤".repeat(Math.max(0, state.lives));
+    document.getElementById('lives-display').innerText = hearts;
+
     if (state.screen === 'VICTORY') {
         document.getElementById('level-display').innerText = "SYSTEM HACKED";
         document.getElementById('level-display').style.color = "#fff";
@@ -674,7 +689,6 @@
     state.transitionTimer = 2.0; 
   }
   
-  // 產生快捷鍵列表 HTML
   function generateListHTML(dataArray) {
     return dataArray.map(item => `
       <div class="shortcut-item">
@@ -709,9 +723,11 @@
     state.screen = 'PLAY';
     state.score = 0;
     state.combo = 0;
+    state.lives = 5; // Reset Lives
     state.levelIdx = 0;
     entities.enemies = [];
     entities.particles = [];
+    state.damageFlash = 0;
     
     document.getElementById('start-screen').style.display = 'none';
     document.getElementById('victory-screen').style.display = 'none';
@@ -733,7 +749,6 @@
     document.getElementById('victory-score').innerText = `FINAL SCORE: ${state.score}`;
     document.getElementById('level-transition').style.display = 'none';
     
-    // 生成勝利秘籍
     const bonusData = BONUS_SHORTCUTS[state.system];
     document.getElementById('victory-list-content').innerHTML = generateListHTML(bonusData);
     
@@ -750,7 +765,6 @@
     document.getElementById('level-transition').style.display = 'none';
     document.getElementById('gameover-score').innerText = `FINAL SCORE: ${state.score}`;
     
-    // 生成失敗複習列表 (顯示當前關卡的所有題目)
     const currentLevelPool = GAME_DATA[state.system][state.levelIdx].pool;
     document.getElementById('gameover-list-content').innerHTML = generateListHTML(currentLevelPool);
   }
@@ -777,9 +791,15 @@
 
     drawBackground(timestamp);
 
-    // Game Logic
+    // Damage Flash
+    if (state.damageFlash > 0) {
+        state.damageFlash -= dt;
+        ctx.fillStyle = `rgba(255, 0, 0, ${state.damageFlash * 0.5})`;
+        ctx.fillRect(0, 0, gameW, gameH);
+    }
+
     if (state.screen === 'VICTORY') {
-        // Victory Animation
+        // Victory Loop
     } 
     else if (state.screen === 'PLAY') {
       const currentLevels = GAME_DATA[state.system];
@@ -798,7 +818,7 @@
         }
       }
 
-      // Level Up Logic (1500, 3500, 5500)
+      // Level Up
       let nextLevel = -1;
       if (state.score > 1500 && state.levelIdx === 0) nextLevel = 1;
       if (state.score > 3500 && state.levelIdx === 1) nextLevel = 2;
@@ -814,13 +834,23 @@
         updateHUD();
       }
 
-      // Enemy Update
+      // Enemy Logic
       entities.enemies.forEach((e, i) => {
         const hit = e.update(dt, currentLevels[state.levelIdx].speed);
         if (hit) {
-          triggerShake(20);
-          AudioSys.playSFX('explode'); 
-          gameOver();
+          // PLAYER HIT!
+          state.lives--;
+          state.combo = 0;
+          state.damageFlash = 0.5;
+          triggerShake(30);
+          AudioSys.playSFX('error'); 
+          
+          // Force remove enemy (move it way behind camera)
+          e.z = -1000;
+
+          if (state.lives <= 0) {
+             gameOver();
+          }
         }
       });
       entities.enemies = entities.enemies.filter(e => e.z > 0);
@@ -915,7 +945,7 @@
       e.preventDefault();
     }
 
-    if (state.screen === 'WELCOME') return; // 歡迎頁面只接受滑鼠點擊
+    if (state.screen === 'WELCOME') return; 
 
     if (state.screen === 'START') {
       if (e.key.toLowerCase() === 'c') window.selectSystemByClick('CHROMEBOOK');
