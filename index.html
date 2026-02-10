@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>NEON SHORTCUT RUNNER: AUDIO UPGRADE</title>
+<title>NEON SHORTCUT RUNNER: ULTIMATE EDITION</title>
 <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Audiowide&display=swap" rel="stylesheet">
 <style>
   body {
@@ -76,7 +76,12 @@
     text-align: center;
     z-index: 60;
     width: 100%;
+    height: 100%;
     display: none;
+    background: rgba(5, 0, 16, 0.9); /* 半透明黑底，讓文字更清楚 */
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
   }
 
   h1 {
@@ -88,9 +93,69 @@
     -webkit-text-fill-color: transparent;
     filter: drop-shadow(0 0 20px #f0f);
     letter-spacing: 5px;
+    text-transform: uppercase;
   }
 
-  /* Victory 專用樣式 */
+  /* 歡迎按鈕 */
+  .init-btn {
+    margin-top: 50px;
+    padding: 20px 40px;
+    font-family: 'Audiowide', cursive;
+    font-size: 1.5rem;
+    background: transparent;
+    color: #0ff;
+    border: 2px solid #0ff;
+    border-radius: 5px;
+    cursor: pointer;
+    box-shadow: 0 0 15px #0ff;
+    transition: all 0.3s;
+    pointer-events: auto;
+  }
+  .init-btn:hover {
+    background: #0ff;
+    color: #000;
+    transform: scale(1.1);
+  }
+
+  /* 快捷鍵列表樣式 */
+  .shortcut-list-container {
+    margin-top: 20px;
+    max-height: 40vh; /* 限制高度 */
+    overflow-y: auto; /* 允許滾動 */
+    width: 80%;
+    max-width: 600px;
+    border: 1px solid #555;
+    background: rgba(0,0,0,0.8);
+    padding: 15px;
+    border-radius: 10px;
+    pointer-events: auto; /* 允許滾動 */
+  }
+  
+  /* 隱藏滾動條但保留功能 */
+  .shortcut-list-container::-webkit-scrollbar { width: 5px; }
+  .shortcut-list-container::-webkit-scrollbar-thumb { background: #555; border-radius: 5px; }
+
+  .list-title {
+    color: #ff0;
+    font-size: 0.8rem;
+    margin-bottom: 15px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+  }
+
+  .shortcut-item {
+    display: flex;
+    justify-content: space-between;
+    border-bottom: 1px dashed #333;
+    padding: 8px 0;
+    font-size: 0.9rem;
+    font-family: monospace;
+  }
+  .shortcut-item:last-child { border-bottom: none; }
+  .sc-label { color: #fff; }
+  .sc-keys { color: #0ff; font-weight: bold; }
+
+  /* Victory 專用 */
   .victory-title {
     font-size: 5rem;
     background: linear-gradient(to bottom, #fff, #0ff);
@@ -99,6 +164,13 @@
     text-shadow: 0 0 30px #0ff;
     animation: glitch 1s infinite;
   }
+  
+  .bonus-section {
+    border-color: #0ff;
+    box-shadow: 0 0 20px rgba(0, 255, 255, 0.2);
+  }
+  .bonus-title { color: #0ff; }
+  .bonus-item .sc-keys { color: #ff00de; }
 
   @keyframes glitch {
     0% { transform: translate(0); }
@@ -107,13 +179,6 @@
     60% { transform: translate(2px, 2px); }
     80% { transform: translate(2px, -2px); }
     100% { transform: translate(0); }
-  }
-
-  .rank-badge {
-    font-size: 2rem;
-    color: #ff0;
-    margin: 20px 0;
-    text-shadow: 0 0 20px #ff0;
   }
 
   .menu-options {
@@ -131,7 +196,7 @@
     transition: all 0.3s;
     background: rgba(0,0,0,0.5);
     cursor: pointer;
-    pointer-events: auto; /* 確保可點擊 */
+    pointer-events: auto;
   }
   
   .option.highlight {
@@ -153,6 +218,13 @@
     font-size: 1rem;
     color: #aaa;
     animation: blink 1s steps(2, start) infinite;
+  }
+  
+  .rank-badge {
+    font-size: 2rem;
+    color: #ff0;
+    margin: 10px 0;
+    text-shadow: 0 0 20px #ff0;
   }
 
   @keyframes blink {
@@ -211,13 +283,20 @@
     <div id="level-display">SYSTEM IDLE</div>
   </div>
   <div class="hud-bottom" id="system-status">
-    SELECT SYSTEM TO BOOT...
+    WAITING FOR USER INPUT...
   </div>
 </div>
 
-<!-- 開始畫面 -->
-<div id="start-screen" class="fullscreen-overlay" style="display:block;">
+<!-- 1. 歡迎畫面 (觸發音效用) -->
+<div id="welcome-screen" class="fullscreen-overlay" style="display:flex;">
   <h1>NEON<br>RUNNER</h1>
+  <div style="margin-top:20px; font-size: 0.8rem; color: #888;">KEYBOARD SHORTCUT TRAINING PROGRAM</div>
+  <button class="init-btn" onclick="window.initSystem()">INITIALIZE SYSTEM</button>
+</div>
+
+<!-- 2. 選單畫面 -->
+<div id="start-screen" class="fullscreen-overlay">
+  <h1>SELECT<br>SYSTEM</h1>
   <div class="menu-options">
     <div class="option" id="opt-chrome" onclick="window.selectSystemByClick('CHROMEBOOK')">
       <span class="key-badge">[C]</span>
@@ -228,23 +307,40 @@
       WINDOWS
     </div>
   </div>
-  <div class="blink-text">PRESS KEY TO SELECT SYSTEM</div>
-  <div style="margin-top:20px; font-size: 0.7rem; color: #555;">(Click to enable Audio)</div>
+  <div class="blink-text">PRESS KEY TO SELECT</div>
 </div>
 
-<!-- 勝利畫面 -->
+<!-- 3. 勝利畫面 -->
 <div id="victory-screen" class="fullscreen-overlay">
   <h1 class="victory-title">SYSTEM<br>HACKED</h1>
   <div class="rank-badge">RANK: S (CYBER GOD)</div>
-  <div class="blink-text" id="victory-score">FINAL SCORE: 000000</div>
-  <div class="blink-text" style="margin-top:10px; color:#fff;">PRESS [ENTER] TO REBOOT</div>
+  <div class="blink-text" id="victory-score" style="margin-top:0;">FINAL SCORE: 000000</div>
+  
+  <!-- 隱藏秘籍列表 -->
+  <div class="shortcut-list-container bonus-section">
+    <div class="list-title bonus-title">SECRET DATA UNLOCKED (BONUS HACKS)</div>
+    <div id="victory-list-content">
+      <!-- JS 動態生成 -->
+    </div>
+  </div>
+
+  <div class="blink-text" style="margin-top:20px; color:#fff; font-size:0.8rem;">PRESS [ENTER] TO REBOOT</div>
 </div>
 
-<!-- Game Over 畫面 -->
+<!-- 4. Game Over 畫面 -->
 <div id="gameover-screen" class="fullscreen-overlay">
   <h1>GAME<br>OVER</h1>
-  <div class="blink-text" id="gameover-score">FINAL SCORE: 0</div>
-  <div class="blink-text" style="margin-top:20px;">PRESS [ENTER] TO RESTART</div>
+  <div class="blink-text" id="gameover-score" style="margin-top:0;">FINAL SCORE: 0</div>
+  
+  <!-- 失敗複習列表 -->
+  <div class="shortcut-list-container">
+    <div class="list-title">REVIEW FAILED PROTOCOLS (LEVEL DATA)</div>
+    <div id="gameover-list-content">
+      <!-- JS 動態生成 -->
+    </div>
+  </div>
+
+  <div class="blink-text" style="margin-top:20px; font-size:0.8rem;">PRESS [ENTER] TO RESTART</div>
 </div>
 
 <div id="level-transition">
@@ -260,42 +356,42 @@
 (function() { 
 
   /**
-   * 🎵 音效管理系統 (Updated)
-   * 支援 MP3 檔案播放、BGM 循環與切換、失焦暫停
+   * 🎵 音效管理系統
    */
   const AudioSys = {
     sounds: {},
     currentBGM: null,
     isMuted: false,
+    initialized: false, // 追蹤是否已初始化
     
-    // 音效資源 URL
     urls: {
       hit: 'https://cdn.pixabay.com/download/audio/2022/03/15/audio_297f73b4ca.mp3?filename=freesound_community-zap_c_07-82067.mp3',
       explode: 'https://cdn.pixabay.com/download/audio/2022/03/19/audio_97dada842f.mp3?filename=freesound_community-8-bit-explosion-95847.mp3',
       error: 'https://cdn.pixabay.com/download/audio/2022/03/10/audio_6b59debae7.mp3?filename=freesound_community-wronganswer-37702.mp3',
       levelup: 'https://cdn.pixabay.com/download/audio/2024/01/02/audio_bba05ac859.mp3?filename=floraphonic-you-win-sequence-1-183948.mp3',
       ui: 'https://cdn.pixabay.com/download/audio/2025/07/13/audio_fad29823bb.mp3?filename=arnav_geddada-ui-sound-374228.mp3',
-      
-      // BGM
       bgm_menu: 'https://cdn.pixabay.com/download/audio/2024/10/01/audio_c3c5abd3cf.mp3?filename=khemrajdotin-chillwave-flow-short-version-246321.mp3',
       bgm_game: 'https://cdn.pixabay.com/download/audio/2025/04/21/audio_ed6f0ed574.mp3?filename=vasilyatsevich-brain-implant-cyberpunk-sci-fi-trailer-action-intro-330416.mp3',
       bgm_victory: 'https://cdn.pixabay.com/download/audio/2025/11/26/audio_912e318fcc.mp3?filename=delosound-synthwave-retro-80s-442850.mp3'
     },
 
     init: function() {
-      // 預載入所有音效
+      if (this.initialized) return;
+      
+      // 建立 AudioContext (如果需要)
+      const AudioContext = window.AudioContext || window.webkitAudioContext;
+      this.ctx = new AudioContext();
+
       for (const [key, url] of Object.entries(this.urls)) {
         this.sounds[key] = new Audio(url);
-        // BGM 設定循環
         if (key.startsWith('bgm_')) {
           this.sounds[key].loop = true;
-          this.sounds[key].volume = 0.5; // BGM 音量稍微小一點
+          this.sounds[key].volume = 0.5;
         } else {
           this.sounds[key].volume = 0.8;
         }
       }
       
-      // 監聽頁面可見度改變 (切換分頁時暫停聲音)
       document.addEventListener("visibilitychange", () => {
         if (document.hidden) {
           this.pauseAll();
@@ -303,25 +399,21 @@
           this.resumeAll();
         }
       });
+
+      this.initialized = true;
     },
 
     playSFX: function(name) {
-      if (this.isMuted || !this.sounds[name]) return;
-      
-      // 複製節點以支援重疊播放 (例如快速連續答對)
+      if (!this.initialized || this.isMuted || !this.sounds[name]) return;
       const sound = this.sounds[name].cloneNode();
       sound.volume = this.sounds[name].volume;
       sound.play().catch(e => console.log("Audio play blocked:", e));
     },
 
     playBGM: function(name) {
-      if (this.isMuted) return;
-      
-      // 如果已經在播同一首，就不重播
+      if (!this.initialized || this.isMuted) return;
       if (this.currentBGM && this.currentBGM === this.sounds[name] && !this.currentBGM.paused) return;
-
-      this.stopBGM(); // 停掉上一首
-
+      this.stopBGM();
       if (this.sounds[name]) {
         this.currentBGM = this.sounds[name];
         this.currentBGM.currentTime = 0;
@@ -352,12 +444,8 @@
     }
   };
 
-  // 初始化音訊系統
-  AudioSys.init();
-
-
   /**
-   * 🎮 題庫資料 (雙系統) + 配色主題
+   * 🎮 題庫資料
    */
   const COMMON_LV1 = [
     { label: "複製", hint: "Ctrl+C", code: { ctrl: true, key: 'c' } },
@@ -380,46 +468,55 @@
 
   const GAME_DATA = {
     CHROMEBOOK: [
-      { 
-        name: "SURVIVOR", color: "#00ffff", speed: 200, pool: COMMON_LV1,
-        gridColor: "#ff00aa", sunColors: ["#ffdd00", "#ff00aa"] 
-      },
-      { 
-        name: "EDITOR", color: "#ff00ff", speed: 250, pool: COMMON_LV2,
-        gridColor: "#00ffff", sunColors: ["#ffffff", "#00ffff"] 
-      },
-      { 
-        name: "HACKER", color: "#ffff00", speed: 320,
-        pool: [
+      { name: "SURVIVOR", color: "#00ffff", speed: 200, pool: COMMON_LV1, gridColor: "#ff00aa", sunColors: ["#ffdd00", "#ff00aa"] },
+      { name: "EDITOR", color: "#ff00ff", speed: 250, pool: COMMON_LV2, gridColor: "#00ffff", sunColors: ["#ffffff", "#00ffff"] },
+      { name: "HACKER", color: "#ffff00", speed: 320, pool: [
+          { label: "書籤列", hint: "Ctrl+Shift+B", code: { ctrl: true, shift: true, key: 'b' } },
+          { label: "重整", hint: "F5", code: { key: 'F5' } },
+          { label: "硬重整", hint: "Ctrl+F5", code: { ctrl: true, key: 'F5' } },
+          { label: "網址列", hint: "Ctrl+L", code: { ctrl: true, key: 'l' } }
+        ], gridColor: "#ff0000", sunColors: ["#ffff00", "#ff0000"] },
+      { name: "GOD MODE", color: "#ffffff", speed: 380, pool: [
           { label: "靠左", hint: "Alt+[", code: { alt: true, key: '[' } },
           { label: "靠右", hint: "Alt+]", code: { alt: true, key: ']' } },
           { label: "大寫", hint: "Alt+🔍", code: { alt: true, meta: true } },
-          { label: "刪除", hint: "Alt+Back", code: { alt: true, key: 'Backspace' } }
-        ],
-        gridColor: "#ff0000", sunColors: ["#ffff00", "#ff0000"] 
-      }
+          { label: "刪除", hint: "Alt+Back", code: { alt: true, key: 'Backspace' } },
+          { label: "截圖", hint: "Ctrl+F5", code: { ctrl: true, key: 'F5' } }
+        ], gridColor: "#ffffff", sunColors: ["#ffffff", "#ffffff"] }
     ],
     WINDOWS: [
-      { 
-        name: "SURVIVOR", color: "#00ffff", speed: 200, pool: COMMON_LV1,
-        gridColor: "#ff00aa", sunColors: ["#ffdd00", "#ff00aa"]
-      },
-      { 
-        name: "EDITOR", color: "#ff00ff", speed: 250, pool: COMMON_LV2,
-        gridColor: "#00ffff", sunColors: ["#ffffff", "#00ffff"]
-      },
-      { 
-        name: "POWERUSER", color: "#00ff00", speed: 300,
-        pool: [
-          { label: "上一頁", hint: "Alt+←", code: { alt: true, key: 'ArrowLeft' } },
-          { label: "下一頁", hint: "Alt+→", code: { alt: true, key: 'ArrowRight' } },
-          { label: "重整", hint: "F5", code: { key: 'F5' } },
-          { label: "全螢幕", hint: "F11", code: { key: 'F11' } },
-          { label: "管理員", hint: "Shift+Esc", code: { shift: true, key: 'Escape' } },
-          { label: "網址列", hint: "Ctrl+L", code: { ctrl: true, key: 'l' } }
-        ],
-        gridColor: "#00ff00", sunColors: ["#ccffcc", "#008800"]
-      }
+      { name: "SURVIVOR", color: "#00ffff", speed: 200, pool: COMMON_LV1, gridColor: "#ff00aa", sunColors: ["#ffdd00", "#ff00aa"] },
+      { name: "EDITOR", color: "#ff00ff", speed: 250, pool: COMMON_LV2, gridColor: "#00ffff", sunColors: ["#ffffff", "#00ffff"] },
+      { name: "POWERUSER", color: "#00ff00", speed: 300, pool: [
+          { label: "頂端", hint: "Home", code: { key: 'Home' } },
+          { label: "底部", hint: "End", code: { key: 'End' } },
+          { label: "網址列", hint: "Alt+D", code: { alt: true, key: 'd' } },
+          { label: "硬重整", hint: "Ctrl+F5", code: { ctrl: true, key: 'F5' } }
+        ], gridColor: "#00ff00", sunColors: ["#ccffcc", "#008800"] },
+      { name: "GOD MODE", color: "#ffffff", speed: 380, pool: [
+          { label: "書籤列", hint: "Ctrl+Shift+B", code: { ctrl: true, shift: true, key: 'b' } },
+          { label: "F12開發", hint: "F12", code: { key: 'F12' } },
+          { label: "尋找", hint: "Ctrl+G", code: { ctrl: true, key: 'g' } },
+          { label: "重整", hint: "Ctrl+R", code: { ctrl: true, key: 'r' } }
+        ], gridColor: "#ffffff", sunColors: ["#ffffff", "#ffffff"] }
+    ]
+  };
+
+  // 隱藏秘籍資料 (Victory Screen)
+  const BONUS_SHORTCUTS = {
+    CHROMEBOOK: [
+      { label: "救回分頁", hint: "Ctrl + Shift + T" },
+      { label: "快捷鍵表", hint: "Ctrl + Alt + /" },
+      { label: "鎖定螢幕", hint: "Search + L" },
+      { label: "開啟程式", hint: "Alt + 1~9" },
+      { label: "登出", hint: "Ctrl + Shift + Q (x2)" }
+    ],
+    WINDOWS: [
+      { label: "鎖定電腦", hint: "Win + L" },
+      { label: "顯示桌面", hint: "Win + D" },
+      { label: "區域截圖", hint: "Win + Shift + S" },
+      { label: "工作管理", hint: "Ctrl + Shift + Esc" },
+      { label: "進階選單", hint: "Win + X" }
     ]
   };
 
@@ -427,7 +524,7 @@
   const ctx = canvas.getContext('2d');
 
   let state = {
-    screen: 'START', // START, PLAY, GAMEOVER, VICTORY
+    screen: 'WELCOME', // WELCOME -> START -> PLAY -> GAMEOVER/VICTORY
     system: 'CHROMEBOOK',
     score: 0,
     combo: 0,
@@ -462,21 +559,17 @@
       this.z = 2000; 
       this.maxZ = 2000;
     }
-
     update(dt, speed) {
       this.z -= speed * dt;
       return this.z < 10; 
     }
-
     draw(ctx) {
       const scale = 300 / (this.z + 10);
       const screenX = gameCX + this.x * scale;
       const screenY = gameH * 0.55 + 40 * scale; 
-      
       const currentLevels = GAME_DATA[state.system];
       const levelColor = currentLevels[state.levelIdx].color;
 
-      // HUD 背景框
       ctx.save();
       const fontSizeLabel = 70 * scale;
       const fontSizeHint = 25 * scale;
@@ -496,7 +589,6 @@
       ctx.strokeRect(boxX, boxY, boxWidth, boxHeight);
       ctx.restore();
 
-      // 文字
       ctx.shadowBlur = 20;
       ctx.shadowColor = levelColor;
       ctx.fillStyle = "#fff";
@@ -581,8 +673,28 @@
     el.style.display = 'block';
     state.transitionTimer = 2.0; 
   }
+  
+  // 產生快捷鍵列表 HTML
+  function generateListHTML(dataArray) {
+    return dataArray.map(item => `
+      <div class="shortcut-item">
+        <span class="sc-label">${item.label}</span>
+        <span class="sc-keys">${item.hint}</span>
+      </div>
+    `).join('');
+  }
 
-  // 暴露給全域以供 HTML onclick 使用
+  // GLOBAL FUNCTIONS
+  window.initSystem = function() {
+    AudioSys.init();
+    AudioSys.playSFX('ui');
+    AudioSys.playBGM('bgm_menu');
+    
+    document.getElementById('welcome-screen').style.display = 'none';
+    document.getElementById('start-screen').style.display = 'flex';
+    state.screen = 'START';
+  };
+
   window.selectSystemByClick = function(sys) {
     state.system = sys;
     document.querySelectorAll('.option').forEach(el => el.classList.remove('highlight'));
@@ -590,11 +702,7 @@
     if(sys === 'WINDOWS') document.getElementById('opt-win').classList.add('highlight');
     
     AudioSys.playSFX('ui');
-    
-    // 延遲一點點讓 UI 音效播完
-    setTimeout(() => {
-        startGame();
-    }, 500);
+    setTimeout(() => { startGame(); }, 500);
   }
 
   function startGame() {
@@ -613,32 +721,38 @@
     const currentLevel = GAME_DATA[state.system][0];
     showTransition(`LEVEL 1`, currentLevel.name);
     
-    AudioSys.playSFX('levelup'); // 使用 Level Up 音效作為開始提示
-    AudioSys.playBGM('bgm_game'); // 開始播放遊戲 BGM
+    AudioSys.playSFX('levelup'); 
+    AudioSys.playBGM('bgm_game');
   }
 
   function victory() {
     state.screen = 'VICTORY';
-    AudioSys.playBGM('bgm_victory'); // 切換勝利 BGM
+    AudioSys.playBGM('bgm_victory'); 
     
-    // 顯示勝利畫面
-    document.getElementById('victory-screen').style.display = 'block';
+    document.getElementById('victory-screen').style.display = 'flex';
     document.getElementById('victory-score').innerText = `FINAL SCORE: ${state.score}`;
     document.getElementById('level-transition').style.display = 'none';
+    
+    // 生成勝利秘籍
+    const bonusData = BONUS_SHORTCUTS[state.system];
+    document.getElementById('victory-list-content').innerHTML = generateListHTML(bonusData);
+    
     updateHUD();
   }
 
   function gameOver() {
     state.screen = 'GAMEOVER';
-    AudioSys.playSFX('error'); // 答錯音效
-    AudioSys.stopBGM(); // 停止音樂
+    AudioSys.playSFX('error'); 
+    AudioSys.stopBGM(); 
     
-    document.getElementById('start-screen').style.display = 'block';
+    document.getElementById('start-screen').style.display = 'none';
+    document.getElementById('gameover-screen').style.display = 'flex';
     document.getElementById('level-transition').style.display = 'none';
+    document.getElementById('gameover-score').innerText = `FINAL SCORE: ${state.score}`;
     
-    document.querySelector('#start-screen h1').innerHTML = "GAME<br>OVER";
-    document.querySelector('.menu-options').style.display = 'none';
-    document.querySelector('.blink-text').innerText = `FINAL SCORE: ${state.score}\nPRESS [ENTER] TO RESTART`;
+    // 生成失敗複習列表 (顯示當前關卡的所有題目)
+    const currentLevelPool = GAME_DATA[state.system][state.levelIdx].pool;
+    document.getElementById('gameover-list-content').innerHTML = generateListHTML(currentLevelPool);
   }
 
   // --- Main Loop ---
@@ -663,14 +777,10 @@
 
     drawBackground(timestamp);
 
-    // 處理勝利畫面的網格加速
+    // Game Logic
     if (state.screen === 'VICTORY') {
-        // 什麼都不做，讓背景自己跑
+        // Victory Animation
     } 
-    else if (state.screen === 'START') {
-        // 如果還沒開始，確保播的是 Menu BGM (但需要使用者互動後才播得出聲音)
-        // 這裡我們不強制 loop 呼叫 playBGM，避免 console 刷錯誤
-    }
     else if (state.screen === 'PLAY') {
       const currentLevels = GAME_DATA[state.system];
       
@@ -688,15 +798,13 @@
         }
       }
 
-      // 升級邏輯
+      // Level Up Logic (1500, 3500, 5500)
       let nextLevel = -1;
       if (state.score > 1500 && state.levelIdx === 0) nextLevel = 1;
       if (state.score > 3500 && state.levelIdx === 1) nextLevel = 2;
+      if (state.score > 5500 && state.levelIdx === 2) nextLevel = 3;
       
-      // 勝利條件：超過 6000 分
-      if (state.score > 6000) {
-        victory();
-      }
+      if (state.score > 8000) { victory(); }
 
       if (nextLevel !== -1) {
         state.levelIdx = nextLevel;
@@ -706,24 +814,23 @@
         updateHUD();
       }
 
+      // Enemy Update
       entities.enemies.forEach((e, i) => {
         const hit = e.update(dt, currentLevels[state.levelIdx].speed);
         if (hit) {
           triggerShake(20);
-          AudioSys.playSFX('explode'); // 撞到也播爆炸
+          AudioSys.playSFX('explode'); 
           gameOver();
         }
       });
       entities.enemies = entities.enemies.filter(e => e.z > 0);
-      
-      // Z-Sorting
       entities.enemies.sort((a, b) => b.z - a.z);
-
       entities.enemies.forEach(e => e.draw(ctx));
       
       updateHUD();
     }
 
+    // Particles
     entities.particles.forEach(p => {
       p.update();
       p.draw(ctx);
@@ -737,24 +844,21 @@
   function drawBackground(time) {
     const horizonY = gameH * 0.55;
     const sunY = horizonY - 50;
-
     let currentTheme = { gridColor: "#ff00aa", sunColors: ["#ffdd00", "#ff00aa"] };
     
-    // 如果是勝利畫面，強制使用「駭客白」主題
     if (state.screen === 'VICTORY') {
         currentTheme = { gridColor: "#ffffff", sunColors: ["#ffffff", "#ccffff"] };
     } else if (state.screen === 'PLAY' || state.screen === 'GAMEOVER') {
         currentTheme = GAME_DATA[state.system][state.levelIdx];
     }
 
-    // 太陽
     const sunGrad = ctx.createLinearGradient(gameCX, sunY - 150, gameCX, sunY + 150);
     sunGrad.addColorStop(0, currentTheme.sunColors[0]);
     sunGrad.addColorStop(1, currentTheme.sunColors[1]);
     
     ctx.save();
     ctx.fillStyle = sunGrad;
-    ctx.shadowBlur = (state.screen === 'VICTORY') ? 100 : 50; // 勝利時太陽更亮
+    ctx.shadowBlur = (state.screen === 'VICTORY') ? 100 : 50; 
     ctx.shadowColor = currentTheme.sunColors[1];
     ctx.beginPath();
     ctx.arc(gameCX, sunY, 120, 0, Math.PI * 2);
@@ -768,7 +872,6 @@
       ctx.fillRect(gameCX - 130, y, 260, h);
     }
 
-    // 縱向網格
     ctx.save();
     ctx.strokeStyle = currentTheme.gridColor;
     ctx.lineWidth = 2;
@@ -784,8 +887,7 @@
     }
     ctx.stroke();
 
-    // 橫向網格 (光速效果)
-    const speed = (state.screen === 'VICTORY') ? 1500 : 150; // 勝利時速度 x10
+    const speed = (state.screen === 'VICTORY') ? 1500 : 150; 
     const offset = (time / 1000 * speed) % 100;
     ctx.beginPath();
     for (let i = 0; i < 15; i++) {
@@ -797,8 +899,6 @@
       }
     }
     ctx.stroke();
-    
-    // 地平線
     ctx.shadowBlur = 30;
     ctx.shadowColor = "#fff";
     ctx.strokeStyle = "#fff";
@@ -807,45 +907,33 @@
     ctx.moveTo(0, horizonY);
     ctx.lineTo(gameW, horizonY);
     ctx.stroke();
-    
     ctx.restore();
   }
 
-  /**
-   * ⌨️ 輸入監聽
-   */
   document.addEventListener('keydown', (e) => {
-    // 第一次按鍵時嘗試播放 Menu BGM (因為瀏覽器禁止自動播放)
-    if (state.screen === 'START' && !AudioSys.currentBGM) {
-        AudioSys.playBGM('bgm_menu');
-    }
-
     if (e.ctrlKey || e.altKey || e.metaKey || e.key === 'F5' || e.key === 'F11') {
       e.preventDefault();
     }
 
-    // START
+    if (state.screen === 'WELCOME') return; // 歡迎頁面只接受滑鼠點擊
+
     if (state.screen === 'START') {
       if (e.key.toLowerCase() === 'c') window.selectSystemByClick('CHROMEBOOK');
       if (e.key.toLowerCase() === 'w') window.selectSystemByClick('WINDOWS');
       return;
     }
 
-    // GAME OVER or VICTORY (Reboot)
     if (state.screen === 'GAMEOVER' || state.screen === 'VICTORY') {
       if (e.key === 'Enter') {
         state.screen = 'START';
         document.querySelector('.menu-options').style.display = 'flex';
-        document.querySelector('#start-screen h1').innerHTML = "NEON<br>RUNNER";
-        document.querySelector('#start-screen .blink-text').innerText = "PRESS KEY TO SELECT SYSTEM";
         document.querySelectorAll('.option').forEach(el => el.classList.remove('highlight'));
         
-        // 隱藏其他畫面
-        document.getElementById('start-screen').style.display = 'block';
+        document.getElementById('start-screen').style.display = 'flex';
         document.getElementById('victory-screen').style.display = 'none';
         document.getElementById('gameover-screen').style.display = 'none';
         
-        AudioSys.playBGM('bgm_menu'); // 回到選單音樂
+        AudioSys.playBGM('bgm_menu'); 
       }
       return;
     }
@@ -879,9 +967,7 @@
         state.score += 100 + (state.combo * 10);
         state.combo++;
         triggerShake(5);
-        AudioSys.playSFX('hit'); // 答對音效
-        
-        // 延遲一點點播爆炸音效，更有層次
+        AudioSys.playSFX('hit'); 
         setTimeout(() => AudioSys.playSFX('explode'), 50); 
         
         const scale = 300 / (enemy.z + 10);
@@ -898,9 +984,6 @@
         setTimeout(() => floatText.remove(), 1000);
 
         entities.enemies.splice(targetIdx, 1);
-      } else if (e.key.length === 1 || e.key === 'Backspace') { 
-        // 簡單的答錯判斷 (避免按 Ctrl 時就響)
-        // 這裡可以選擇是否加入答錯音效，為了不打擊信心，通常只在 Combo 斷掉或 GameOver 時播
       }
     }
   });
