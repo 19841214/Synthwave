@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>NEON SHORTCUT RUNNER: HP UPDATE</title>
+<title>NEON SHORTCUT RUNNER: GREEN LIGHT FIX</title>
 <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Audiowide&display=swap" rel="stylesheet">
 <style>
   body {
@@ -309,6 +309,13 @@
 <div id="welcome-screen" class="fullscreen-overlay" style="display:flex;">
   <h1>NEON<br>RUNNER</h1>
   <div style="margin-top:20px; font-size: 0.8rem; color: #888;">KEYBOARD SHORTCUT TRAINING PROGRAM</div>
+  
+  <!-- 新增：Search 鍵位置提示 -->
+  <div style="margin-top:20px; padding: 10px; border: 1px dashed #555; color: #ff00de; font-size: 0.6rem; line-height: 1.5;">
+    <div>⚠️ CHROMEBOOK USER GUIDE:</div>
+    <div style="color: #fff; margin-top:5px;">SEARCH KEY (🔍) IS LOCATED AT <span style="color:#0ff">CAPS LOCK</span> POSITION</div>
+  </div>
+
   <button class="init-btn" onclick="window.initSystem()">INITIALIZE SYSTEM</button>
 </div>
 
@@ -455,7 +462,7 @@
   };
 
   /**
-   * 🎮 題庫資料
+   * 🎮 題庫資料 (100% GREEN LIGHT SAFE MODE)
    */
   const COMMON_LV1 = [
     { label: "複製", hint: "Ctrl+C", code: { ctrl: true, key: 'c' } },
@@ -482,30 +489,30 @@
       { name: "EDITOR", color: "#ff00ff", speed: 250, pool: COMMON_LV2, gridColor: "#00ffff", sunColors: ["#ffffff", "#00ffff"] },
       { name: "HACKER", color: "#ffff00", speed: 320, pool: [
           { label: "書籤列", hint: "Ctrl+Shift+B", code: { ctrl: true, shift: true, key: 'b' } },
-          { label: "重整", hint: "F5", code: { key: 'F5' } },
-          { label: "硬重整", hint: "Ctrl+F5", code: { ctrl: true, key: 'F5' } },
+          { label: "重整", hint: "Ctrl+R", code: { ctrl: true, key: 'r' } },
+          { label: "硬重整", hint: "Ctrl+Shift+R", code: { ctrl: true, shift: true, key: 'r' } },
           { label: "網址列", hint: "Ctrl+L", code: { ctrl: true, key: 'l' } }
         ], gridColor: "#ff0000", sunColors: ["#ffff00", "#ff0000"] },
       { name: "GOD MODE", color: "#ffffff", speed: 380, pool: [
-          { label: "靠左", hint: "Alt+[", code: { alt: true, key: '[' } },
-          { label: "靠右", hint: "Alt+]", code: { alt: true, key: ']' } },
-          { label: "大寫", hint: "Alt+🔍", code: { alt: true, meta: true } },
-          { label: "刪除", hint: "Alt+Back", code: { alt: true, key: 'Backspace' } },
-          { label: "截圖", hint: "Ctrl+F5", code: { ctrl: true, key: 'F5' } }
+          { label: "頁首Home", hint: "Search+←", code: { meta: true, key: 'ArrowLeft' } },
+          { label: "頁尾End", hint: "Search+→", code: { meta: true, key: 'ArrowRight' } },
+          { label: "上一頁", hint: "Alt+←", code: { alt: true, key: 'ArrowLeft' } },
+          { label: "下一頁", hint: "Alt+→", code: { alt: true, key: 'ArrowRight' } },
+          { label: "全螢幕", hint: "F4 (🔍+4)", code: { key: 'F4' } } 
         ], gridColor: "#ffffff", sunColors: ["#ffffff", "#ffffff"] }
     ],
     WINDOWS: [
       { name: "SURVIVOR", color: "#00ffff", speed: 200, pool: COMMON_LV1, gridColor: "#ff00aa", sunColors: ["#ffdd00", "#ff00aa"] },
       { name: "EDITOR", color: "#ff00ff", speed: 250, pool: COMMON_LV2, gridColor: "#00ffff", sunColors: ["#ffffff", "#00ffff"] },
       { name: "POWERUSER", color: "#00ff00", speed: 300, pool: [
-          { label: "頂端", hint: "Home", code: { key: 'Home' } },
-          { label: "底部", hint: "End", code: { key: 'End' } },
+          { label: "頁首", hint: "Home", code: { key: 'Home' } },
+          { label: "頁尾", hint: "End", code: { key: 'End' } },
           { label: "網址列", hint: "Alt+D", code: { alt: true, key: 'd' } },
           { label: "硬重整", hint: "Ctrl+F5", code: { ctrl: true, key: 'F5' } }
         ], gridColor: "#00ff00", sunColors: ["#ccffcc", "#008800"] },
       { name: "GOD MODE", color: "#ffffff", speed: 380, pool: [
           { label: "書籤列", hint: "Ctrl+Shift+B", code: { ctrl: true, shift: true, key: 'b' } },
-          { label: "F12開發", hint: "F12", code: { key: 'F12' } },
+          { label: "原始碼", hint: "Ctrl+U", code: { ctrl: true, key: 'u' } },
           { label: "尋找", hint: "Ctrl+G", code: { ctrl: true, key: 'g' } },
           { label: "重整", hint: "Ctrl+R", code: { ctrl: true, key: 'r' } }
         ], gridColor: "#ffffff", sunColors: ["#ffffff", "#ffffff"] }
@@ -517,8 +524,8 @@
       { label: "救回分頁", hint: "Ctrl + Shift + T" },
       { label: "快捷鍵表", hint: "Ctrl + Alt + /" },
       { label: "鎖定螢幕", hint: "Search + L" },
-      { label: "開啟程式", hint: "Alt + 1~9" },
-      { label: "登出", hint: "Ctrl + Shift + Q (x2)" }
+      { label: "檔案總管", hint: "Alt + Shift + M" },
+      { label: "任務管理", hint: "Search + Esc" }
     ],
     WINDOWS: [
       { label: "鎖定電腦", hint: "Win + L" },
@@ -663,7 +670,6 @@
     document.getElementById('score-display').innerText = `SCORE: ${state.score.toString().padStart(6, '0')}`;
     document.getElementById('combo-display').innerText = `COMBO: ${state.combo}`;
     
-    // 生命值顯示
     const hearts = "❤".repeat(Math.max(0, state.lives));
     document.getElementById('lives-display').innerText = hearts;
 
@@ -723,7 +729,7 @@
     state.screen = 'PLAY';
     state.score = 0;
     state.combo = 0;
-    state.lives = 5; // Reset Lives
+    state.lives = 5; 
     state.levelIdx = 0;
     entities.enemies = [];
     entities.particles = [];
@@ -791,7 +797,6 @@
 
     drawBackground(timestamp);
 
-    // Damage Flash
     if (state.damageFlash > 0) {
         state.damageFlash -= dt;
         ctx.fillStyle = `rgba(255, 0, 0, ${state.damageFlash * 0.5})`;
@@ -818,7 +823,6 @@
         }
       }
 
-      // Level Up
       let nextLevel = -1;
       if (state.score > 1500 && state.levelIdx === 0) nextLevel = 1;
       if (state.score > 3500 && state.levelIdx === 1) nextLevel = 2;
@@ -834,18 +838,15 @@
         updateHUD();
       }
 
-      // Enemy Logic
       entities.enemies.forEach((e, i) => {
         const hit = e.update(dt, currentLevels[state.levelIdx].speed);
         if (hit) {
-          // PLAYER HIT!
           state.lives--;
           state.combo = 0;
           state.damageFlash = 0.5;
           triggerShake(30);
           AudioSys.playSFX('error'); 
           
-          // Force remove enemy (move it way behind camera)
           e.z = -1000;
 
           if (state.lives <= 0) {
@@ -860,7 +861,6 @@
       updateHUD();
     }
 
-    // Particles
     entities.particles.forEach(p => {
       p.update();
       p.draw(ctx);
